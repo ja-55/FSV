@@ -16,3 +16,10 @@ The following variables can be set to accept a range of assumptions over the for
 
 * Revenue growth
 * Gross margin expansion
+
+### Order of Operations
+1) Forecast revenue (set manually based on historical growth extrapolation)
+2) Forecast COS (set margin manually based on historical extrapolation)
+
+### Questions to Deal With
+* Margin inertia - Growth can be set based on a distribution, but margins are more path dependent; how to account for this in individual simulations?
