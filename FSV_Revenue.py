@@ -15,9 +15,14 @@ fcst_yrs = list(range(fcst_yr1, fcst_yr1 + 3))
 data = data.reindex(columns = data.columns.tolist() + fcst_yrs)
 
 # GENERATE REVENUE GROWTH DISTRIBUTION (Skewnorm distribution)
-a, loc, scale = 1.3, -0.1, 2.2
+a, loc, scale = 4, 0.04, 0.08
 sample = skewnorm(a, loc, scale).rvs(1000)
 
-# ADD REVENUE GROWTH ROW
+# ADD REVENUE GROWTH ROW & POPULATE
 data.loc['Growth',:] = data.loc['Revenue',:].pct_change()
 
+for yr in fcst_yrs:
+    data.loc['Growth', yr] = np.random.choice(sample, 1)
+    data.loc['Revenue', yr] = data.loc['Revenue', (yr - 1)] * (1 + data.loc['Growth', yr])
+
+print(data)
