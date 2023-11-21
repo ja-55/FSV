@@ -2,7 +2,9 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import skewnorm
+from scipy.stats import norm
 import matplotlib.pyplot as plt
+
 
 # READ IN DATA
 data = pd.read_excel('FSV_Input.xlsx', sheet_name = 'Grid')
@@ -40,9 +42,8 @@ for yr in fcst_yrs:
 # GROSS MARGIN
 
 
-# GENERATE GROSS MARGIN DISTRIBUTION (Skewnorm distribution)
-a, loc, scale = 4, 0.30, 0.35
-dist_mn_gross = skewnorm(a, loc, scale).rvs(1000)
+# GENERATE GROSS MARGIN DISTRIBUTION (Normal distribution)
+dist_mn_gross = norm(loc = 0.326, scale = 0.01).rvs(1000)
 
 # ADD GROSS MARGIN LINE
 metr_is.loc['Margin_Gross',:] = 1 - (main_is.loc['COS',:] / main_is.loc['Revenue',:])
@@ -50,5 +51,47 @@ metr_is.loc['Margin_Gross',:] = 1 - (main_is.loc['COS',:] / main_is.loc['Revenue
 for yr in fcst_yrs:
     metr_is.loc['Margin_Gross', yr] = np.random.choice(dist_mn_gross, 1)
     main_is.loc['COS', yr] = main_is.loc['Revenue', yr] * (1 - metr_is.loc['Margin_Gross', yr])
+
+
+# OPERATING EXPENSES (NON-DEPRECIATION)
+
+
+# GENERATE DISTRIBUTION (Normal distribution)
+dist_mn_opex_nondepr = norm(loc = 0.125, scale = 0.01).rvs(1000)
+
+# ADD OPEX NON-DEPR MARGIN LINE
+metr_is.loc['Margin_Opex_NonDepr',:] = main_is.loc['Opex_NonDepr',:] / main_is.loc['Revenue',:]
+
+for yr in fcst_yrs:
+    metr_is.loc['Margin_Opex_NonDepr', yr] = np.random.choice(dist_mn_opex_nondepr, 1)
+    main_is.loc['Opex_NonDepr', yr] = main_is.loc['Revenue', yr] * metr_is.loc['Margin_Opex_NonDepr', yr]
+
+
+# DEPRECIATION / AMORTIZATION
+
+
+# GENERATE DISTRIBUTION (Normal distribution)
+dist_mn_depr = norm(loc = 0.032, scale = 0.0025).rvs(1000)
+
+# ADD OPEX NON-DEPR MARGIN LINE
+metr_is.loc['Margin_Depr',:] = main_is.loc['Depr',:] / main_is.loc['Revenue',:]
+
+for yr in fcst_yrs:
+    metr_is.loc['Margin_Depr', yr] = np.random.choice(dist_mn_depr, 1)
+    main_is.loc['Depr', yr] = main_is.loc['Revenue', yr] * metr_is.loc['Margin_Depr', yr]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 print(metr_is)
