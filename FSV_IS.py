@@ -3,13 +3,11 @@ import pandas as pd
 import numpy as np
 from scipy.stats import skewnorm
 from scipy.stats import norm
-import matplotlib.pyplot as plt
 
+import FSV_Helpers as fsvh
 
 # NOTES
-
 # python -m http.server
-
 
 
 # READ IN DATA
@@ -27,31 +25,11 @@ fcst_yrs = list(range(fcst_yr1, fcst_yr1 + 3))
 # ADD FORECAST COLUMNS
 main_is = main_is.reindex(columns = main_is.columns.tolist() + fcst_yrs)
 
-
-# REVENUE
-
-
-# GENERATE REVENUE GROWTH DISTRIBUTION (Skewnorm distribution)
-a, loc, scale = 4, -0.05, 0.1
-dist_gr_rev = skewnorm(a, loc, scale).rvs(1000)
-
 # SET UP METRICS 
 metr_is = pd.DataFrame(columns = main_is.columns.tolist())
 
-# ADD ACTUALS TO INCOME STATEMENT DATAFRAME
-for yr in main_is.columns:
-    
-    if yr < fcst_yr1:
-        main_is.loc['Revenue', yr] = data.loc['Revenue', yr]
-    else:
-        pass
-
-# ADD REVENUE GROWTH LINE
-metr_is.loc['Growth_Revenue',:] = data.loc['Revenue',:].pct_change()
-
-for yr in fcst_yrs:
-    metr_is.loc['Growth_Revenue', yr] = np.random.choice(dist_gr_rev, 1)
-    main_is.loc['Revenue', yr] = main_is.loc['Revenue', (yr - 1)] * (1 + metr_is.loc['Growth_Revenue', yr])
+# REVENUE
+main_is, metr_is = fsvh.fcst_rev(main_is, metr_is, data, fcst_yrs, fcst_yr1)
 
 
 # GROSS MARGIN
@@ -122,13 +100,5 @@ for yr in fcst_yrs:
 
 
 
-
-
-
-
-
-
-
-
-
 print(main_is)
+print(metr_is)
