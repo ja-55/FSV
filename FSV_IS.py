@@ -31,27 +31,8 @@ metr_is = pd.DataFrame(columns = main_is.columns.tolist())
 # REVENUE
 main_is, metr_is = fsvh.fcst_rev(main_is, metr_is, data, fcst_yrs, fcst_yr1)
 
-
 # GROSS MARGIN
-
-
-# ADD ACTUALS TO INCOME STATEMENT DATAFRAME
-for yr in main_is.columns:
-    
-    if yr < fcst_yr1:
-        main_is.loc['COS', yr] = data.loc['COS', yr]
-    else:
-        pass
-
-# GENERATE GROSS MARGIN DISTRIBUTION (Normal distribution)
-dist_mn_gross = norm(loc = 0.326, scale = 0.01).rvs(1000)
-
-# ADD GROSS MARGIN LINE
-metr_is.loc['Margin_Gross',:] = 1 - (main_is.loc['COS',:] / main_is.loc['Revenue',:])
-
-for yr in fcst_yrs:
-    metr_is.loc['Margin_Gross', yr] = np.random.choice(dist_mn_gross, 1)
-    main_is.loc['COS', yr] = main_is.loc['Revenue', yr] * (1 - metr_is.loc['Margin_Gross', yr])
+main_is, metr_is = fsvh.fcst_mn_gross(main_is, metr_is, data, fcst_yrs, fcst_yr1)
 
 
 # OPERATING EXPENSES (NON-DEPRECIATION)
@@ -102,3 +83,7 @@ for yr in fcst_yrs:
 
 print(main_is)
 print(metr_is)
+
+# OUTPUT
+main_is.to_json('FSV_OP_IS.json')
+metr_is.to_json('FSV_OP_Metr.json')

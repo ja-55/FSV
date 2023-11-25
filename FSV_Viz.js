@@ -7,7 +7,11 @@ var svg = d3.select('svg')
     .attr("height", svgHeight)
     .attr("class", "bar-chart");
 
-var dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
+// var dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
+
+var dataset = d3.json("FSV_OP_IS.json", function(error, data) {
+    console.log(data);
+});
 
 var barPadding = 5;  
 var barWidth = (svgWidth / dataset.length);
