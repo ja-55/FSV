@@ -13,9 +13,11 @@ import FSV_Helpers as fsvh
 # READ IN DATA
 data = pd.read_excel('FSV_Input.xlsx', sheet_name = 'Grid')
 main_is = pd.DataFrame(columns = data.columns)
+main_bs = pd.DataFrame(columns = data.columns)
 
 data.set_index('Desc', inplace = True)
 main_is.set_index('Desc', inplace = True)
+main_bs.set_index('Desc', inplace = True)
 
 # VARIABLE SETUP
 hist_yr1 = main_is.columns[1]
@@ -24,6 +26,7 @@ fcst_yrs = list(range(fcst_yr1, fcst_yr1 + 3))
 
 # ADD FORECAST COLUMNS
 main_is = main_is.reindex(columns = main_is.columns.tolist() + fcst_yrs)
+main_bs = main_bs.reindex(columns = main_is.columns.tolist() + fcst_yrs)
 
 # SET UP METRICS 
 metr_is = pd.DataFrame(columns = main_is.columns.tolist())
@@ -80,9 +83,6 @@ for yr in fcst_yrs:
 
 
 
-
-print(main_is)
-print(metr_is)
 
 # OUTPUT
 main_is.to_json('FSV_OP_IS.json')

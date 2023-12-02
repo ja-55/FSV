@@ -48,3 +48,30 @@ def fcst_mn_gross(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
         fcst_is.loc['COS', yr] = fcst_is.loc['Revenue', yr] * (1 - fcst_metr.loc['Margin_Gross', yr])
 
     return (fcst_is, fcst_metr)
+
+
+# COST OF DEBT / INTEREST EXPENSE (Still needs debt forecasting)
+
+def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
+             dst_loc = 0.03, dst_scale = 0.0025):
+
+    # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
+    for yr in fcst_is.columns:
+        
+        if yr < fcst_yr1:
+            fcst_is.loc['IntExp', yr] = data.loc['IntExp', yr]
+            fcst_bs.loc['LTD_Current', yr] = data.loc['LTD_Current', yr]
+            fcst_bs.loc['LTD_NonCurrent', yr] = data.loc['LTD_NonCurrent', yr]
+        else: pass
+
+    # GENERATE GROSS MARGIN DISTRIBUTION (Normal distribution)
+    dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
+
+    # ADD COST OF DEBT LINE
+    fcst_metr.loc['CostDebt',:] = fcst_is.loc['IntExp',:] / (fcst_bs.loc['LTD_Current',:] + fcst_bs.loc['LTD_NonCurrent',:])
+
+    for yr in fcst_yrs:
+        fcst_metr.loc['CostDebt', yr] = np.random.choice(dst, 1)
+        fcst_is.loc['IntExp', yr] = (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr]) * fcst_metr.loc['CostDebt', yr]
+
+    return (fcst_is, fcst_bs, fcst_metr)
