@@ -39,47 +39,12 @@ main_is, metr_is = fsvh.fcst_mn_gross(main_is, metr_is, data, fcst_yrs, fcst_yr1
 
 
 # OPERATING EXPENSES (NON-DEPRECIATION)
-
-
-# ADD ACTUALS TO INCOME STATEMENT DATAFRAME
-for yr in main_is.columns:
-    
-    if yr < fcst_yr1:
-        main_is.loc['Opex_NonDepr', yr] = data.loc['Opex_NonDepr', yr]
-    else:
-        pass
-
-# GENERATE DISTRIBUTION (Normal distribution)
-dist_mn_opex_nondepr = norm(loc = 0.125, scale = 0.01).rvs(1000)
-
-# ADD OPEX NON-DEPR MARGIN LINE
-metr_is.loc['Margin_Opex_NonDepr',:] = main_is.loc['Opex_NonDepr',:] / main_is.loc['Revenue',:]
-
-for yr in fcst_yrs:
-    metr_is.loc['Margin_Opex_NonDepr', yr] = np.random.choice(dist_mn_opex_nondepr, 1)
-    main_is.loc['Opex_NonDepr', yr] = main_is.loc['Revenue', yr] * metr_is.loc['Margin_Opex_NonDepr', yr]
+main_is, metr_is = fsvh.fcst_mn_sga(main_is, metr_is, data, fcst_yrs, fcst_yr1)
 
 
 # DEPRECIATION EXPENSES
 
 
-# ADD ACTUALS TO INCOME STATEMENT DATAFRAME
-for yr in main_is.columns:
-    
-    if yr < fcst_yr1:
-        main_is.loc['Depr', yr] = data.loc['Depr', yr]
-    else:
-        pass
-
-# GENERATE DISTRIBUTION (Normal distribution)
-dist_mn_opex_depr = norm(loc = 0.033, scale = 0.005).rvs(1000)
-
-# ADD OPEX NON-DEPR MARGIN LINE
-metr_is.loc['Margin_Opex_Depr',:] = main_is.loc['Depr',:] / main_is.loc['Revenue',:]
-
-for yr in fcst_yrs:
-    metr_is.loc['Margin_Opex_Depr', yr] = np.random.choice(dist_mn_opex_depr, 1)
-    main_is.loc['Depr', yr] = main_is.loc['Revenue', yr] * metr_is.loc['Margin_Opex_Depr', yr]
 
 
 

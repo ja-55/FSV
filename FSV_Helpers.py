@@ -49,8 +49,62 @@ def fcst_mn_gross(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
 
     return (fcst_is, fcst_metr)
 
+# SG&A MARGIN (Ex. Depreciation)
 
-# COST OF DEBT / INTEREST EXPENSE (Still needs debt forecasting)
+def fcst_mn_sga(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
+             dst_loc = 0.12, dst_scale = 0.005):
+
+    # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
+    for yr in fcst_is.columns:
+        
+        if yr < fcst_yr1: fcst_is.loc['Opex_NonDepr', yr] = data.loc['Opex_NonDepr', yr]
+        else: pass
+
+    # GENERATE SG&A DISTRIBUTION (Normal distribution)
+    dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
+
+    # ADD SG&A MARGIN LINE
+    fcst_metr.loc['Margin_SGA',:] = 1 - (fcst_is.loc['Opex_NonDepr',:] / fcst_is.loc['Revenue',:])
+
+    for yr in fcst_yrs:
+        fcst_metr.loc['Margin_SGA', yr] = np.random.choice(dst, 1)
+        fcst_is.loc['Opex_NonDepr', yr] = fcst_is.loc['Revenue', yr] * (1 - fcst_metr.loc['Margin_SGA', yr])
+
+    return (fcst_is, fcst_metr)
+
+# DEPRECIATION
+
+def fcst_depr(fcst_is, , fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
+             dst_loc = 0.12, dst_scale = 0.005):
+
+    # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
+    for yr in fcst_is.columns:
+        
+        if yr < fcst_yr1:
+            fcst_is.loc['Depr', yr] = data.loc['Depr', yr]
+            fcst_bs.loc['PPE_Gross', yr] = data.loc['PPE_Gross', yr]
+            fcst_bs.loc['Accum_Depr', yr] = data.loc['Accum_Depr', yr]
+            fcst_bs.loc['PPE_Net', yr] = fcst_bs.loc['PPE_Gross', yr] - fcst_bs.loc['Accum_Depr', yr]
+        else: pass
+
+
+    # ADD HISTORICAL AVERAGE ASSET LIFE TO METRICS
+    if yr < fcst_yr1:
+        fcst_metr.loc['AssetLife',:] = fcst_bs.loc['PPE_Gross', yr] / fcst_is.loc['Depr', yr]
+    
+    # CREATE DISTRIBUTION FOR ASSET LIFE
+    dst_loc = fcst_metr.loc['AssetLife',:(fcst_yr1 - 1)].mean()
+    dst_scale = fcst_metr.loc['AssetLife',:(fcst_yr1 - 1)].std()
+    dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
+
+    # ADD FORECAST AVERAGE ASSET LIFE TO METRICS
+    if yr >= fcst_yr1:
+        fcst_metr.loc['AssetLife',yr] = np.random.choice(dst, 1)
+
+    # NEED GROSS PPE FORECAST TO FINISH
+
+
+# COST OF DEBT / INTEREST EXPENSE (Pending debt forecasting)
 
 def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
              dst_loc = 0.03, dst_scale = 0.0025):
@@ -67,7 +121,7 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
     # GENERATE GROSS MARGIN DISTRIBUTION (Normal distribution)
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
 
-    # ADD COST OF DEBT LINE
+    # ADD COST OF DEBT TO METRICS
     fcst_metr.loc['CostDebt',:] = fcst_is.loc['IntExp',:] / (fcst_bs.loc['LTD_Current',:] + fcst_bs.loc['LTD_NonCurrent',:])
 
     for yr in fcst_yrs:
@@ -75,3 +129,21 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
         fcst_is.loc['IntExp', yr] = (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr]) * fcst_metr.loc['CostDebt', yr]
 
     return (fcst_is, fcst_bs, fcst_metr)
+
+# ACCOUNTS RECEIVABLE
+
+
+
+# OTHER SIMPLE FORECASTS
+
+def fcst_oth(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
+
+    # GOODWILL & INTANGBILE ASSETS (No variability)
+    for yr in fcst_bs.columns:
+        if yr < fcst_yr1:
+            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', yr]
+            fcst_bs.loc['Intangibles', yr] = data.loc['Intangibles', yr]
+        elif yr >= fcst_yr1:
+            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', (fcst_yr1 - 1)]
+            fcst_bs.loc['Intangibles', yr] = data.loc['Intangibles', (fcst_yr1 - 1)]
+
