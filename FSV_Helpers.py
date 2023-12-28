@@ -159,6 +159,33 @@ def fcst_turnratios(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
 
     return (fcst_is, fcst_bs, fcst_metr)
 
+# OTHER BALANCE SHEET PERCENT OF REV FORECASTS (Other CA, Other NCA, Other CL, Other NCL)
+
+def fcst_pctofrev(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, stmt_name):
+
+    metr_name = 'POR_' + stmt_name
+
+    # ADD ACTUALS TO INCOME STATEMENT / BALANCE SHEET DATAFRAME
+    for yr in fcst_bs.columns:
+
+        if yr < fcst_yr1:
+            fcst_bs.loc[stmt_name, yr] = data.loc[stmt_name, yr]
+            fcst_metr.loc[(metr_name),yr] = fcst_bs.loc[metr_name, yr] / fcst_is.loc['Revenue', yr]
+        else: pass
+
+    # GENERATE TURNOVER DISTRIBUTION (Normal distribution)
+    dst_loc = fcst_metr.loc[metr_name,:(fcst_yr1 - 1)].mean()
+    dst_scale = fcst_metr.loc[metr_name,:(fcst_yr1 - 1)].std()
+    dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
+
+    # FORECAST TURNOVER AND TURN METRIC
+    for yr in fcst_yrs:
+        fcst_metr.loc[metr_name, yr] = np.random.choice(dst, 1)
+        fcst_bs.loc[stmt_name, yr] = fcst_is.loc['Revenue', yr] * fcst_metr.loc[metr_name, yr]
+
+    return (fcst_is, fcst_bs, fcst_metr)
+
+
 
 # OTHER SIMPLE FORECASTS
 
