@@ -103,13 +103,15 @@ def fcst_depr(fcst_is, , fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
 
     # NEED GROSS PPE FORECAST TO FINISH
 
+    return (fcst_is, fcst_bs, fcst_metr)
+
 
 # COST OF DEBT / INTEREST EXPENSE (Pending debt forecasting)
 
 def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
              dst_loc = 0.03, dst_scale = 0.0025):
 
-    # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
+    # ADD ACTUALS TO INCOME STATEMENT / BALANCE SHEET DATAFRAME
     for yr in fcst_is.columns:
         
         if yr < fcst_yr1:
@@ -130,8 +132,32 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
 
     return (fcst_is, fcst_bs, fcst_metr)
 
-# ACCOUNTS RECEIVABLE
+# ACCOUNTS RECEIVABLE / INVENTORY / ACCOUNTS PAYABLE
 
+def fcst_turnratios(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
+                    turn_metric, turn_base):
+
+    turn_name = 'Turn_' + turn_metric
+
+    # ADD ACTUALS TO INCOME STATEMENT / BALANCE SHEET DATAFRAME
+    for yr in fcst_bs.columns:
+        
+        if yr < fcst_yr1:
+            fcst_bs.loc[turn_metric, yr] = data.loc[turn_metric, yr]
+            fcst_metr.loc[(turn_name),yr] = fcst_is.loc[turn_base, yr] / fcst_bs.loc[turn_metric, yr]
+        else: pass
+
+    # GENERATE TURNOVER DISTRIBUTION (Normal distribution)
+    dst_loc = fcst_metr.loc[turn_name,:(fcst_yr1 - 1)].mean()
+    dst_scale = fcst_metr.loc[turn_name,:(fcst_yr1 - 1)].std()
+    dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
+
+    # FORECAST TURNOVER AND TURN METRIC
+    for yr in fcst_yrs:
+        fcst_metr.loc[turn_name, yr] = np.random.choice(dst, 1)
+        fcst_bs.loc[turn_metric, yr] = fcst_is.loc[turn_base, yr] / fcst_metr.loc[turn_name, yr]
+
+    return (fcst_is, fcst_bs, fcst_metr)
 
 
 # OTHER SIMPLE FORECASTS
@@ -147,3 +173,4 @@ def fcst_oth(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
             fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', (fcst_yr1 - 1)]
             fcst_bs.loc['Intangibles', yr] = data.loc['Intangibles', (fcst_yr1 - 1)]
 
+    return (fcst_is, fcst_bs, fcst_metr)
