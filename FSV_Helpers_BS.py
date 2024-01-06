@@ -72,18 +72,25 @@ def fcst_fixedassets(fcst_bs, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1, stmt
         fcst_bs.loc['PPE_Gross', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] + fcst_cf.loc['Capex', yr] + fcst_metr.loc['FA_Rtmt', yr]
 
         # Intangible assets
-        fcst_metr.loc['IA_Rtmt_Pct', yr] = np.random.choice(dst_fa, 1)
+        fcst_metr.loc['IA_Rtmt_Pct', yr] = np.random.choice(dst_ia, 1)
         fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] * fcst_metr.loc['IA_Rtmt_Pct', yr]
         fcst_bs.loc['IA_Gross', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] + fcst_cf.loc['IA_Adds', yr] + fcst_metr.loc['IA_Rtmt', yr]
 
 
     return (fcst_bs, fcst_cf, fcst_metr)
 
+# OTHER SIMPLE FORECASTS
 
-    
+def fcst_goodwill(fcst_bs, data, fcst_yr1):
 
-    
+    # GOODWILL & INTANGBILE ASSETS (No variability)
+    for yr in fcst_bs.columns:
+        if yr < fcst_yr1:
+            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', yr]
+        elif yr >= fcst_yr1:
+            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', (fcst_yr1 - 1)]
 
+    return fcst_bs
 
 
 # OTHER BALANCE SHEET PERCENT OF REV FORECASTS (Other CA, Other NCA, Other CL, Other NCL)
@@ -97,7 +104,7 @@ def fcst_pctofrev(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, stmt_na
 
         if yr < fcst_yr1:
             fcst_bs.loc[stmt_name, yr] = data.loc[stmt_name, yr]
-            fcst_metr.loc[(metr_name),yr] = fcst_bs.loc[metr_name, yr] / fcst_is.loc['Revenue', yr]
+            fcst_metr.loc[metr_name, yr] = fcst_bs.loc[metr_name, yr] / fcst_is.loc['Revenue', yr]
         else: pass
 
     # Generate distribution (Normal distribution)

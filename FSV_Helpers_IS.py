@@ -40,12 +40,14 @@ def fcst_mn_gross(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
     # GENERATE GROSS MARGIN DISTRIBUTION (Normal distribution)
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
 
-    # ADD GROSS MARGIN LINE
+    # ADD GROSS MARGIN / GROSS PROFIT LINE
     fcst_metr.loc['Margin_Gross',:] = 1 - (fcst_is.loc['COS',:] / fcst_is.loc['Revenue',:])
+    fcst_is.loc['SubT_GrossProfit',:] = fcst_is.loc['Revenue',:] - fcst_is.loc['COS',:]
 
     for yr in fcst_yrs:
         fcst_metr.loc['Margin_Gross', yr] = np.random.choice(dst, 1)
         fcst_is.loc['COS', yr] = fcst_is.loc['Revenue', yr] * (1 - fcst_metr.loc['Margin_Gross', yr])
+        fcst_is.loc['SubT_GrossProfit', :] = fcst_is.loc['Revenue',:] - fcst_is.loc['COS',:]
 
     return (fcst_is, fcst_metr)
 
@@ -82,23 +84,27 @@ def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
         
         if yr < fcst_yr1:
             fcst_is.loc['Depr', yr] = data.loc['Depr', yr]
+            fcst_bs.loc['PPE_Gross', yr] = data.loc['PPE_Gross', yr]
+            fcst_bs.loc['IA_Gross', yr] = data.loc['IA_Gross', yr]
+
+            # Add historical average asset life to metrics
+            fcst_metr.loc['AssetLife',yr] = (fcst_bs.loc['PPE_Gross', yr] + fcst_bs.loc['IA_Gross', yr]) / fcst_is.loc['Depr', yr]
+
         else: pass
 
-    # Add historical average asset life to metrics
-    if yr < fcst_yr1:
-        fcst_metr.loc['AssetLife',:] = (fcst_bs.loc['PPE_Gross', yr] + fcst_bs.loc['IA_Gross', yr]) / fcst_is.loc['Depr', yr]
-    
     # Create distribution for average asset life
     dst_loc = fcst_metr.loc['AssetLife',:(fcst_yr1 - 1)].mean()
     dst_scale = fcst_metr.loc['AssetLife',:(fcst_yr1 - 1)].std()
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
 
-    # Add forecast of average asset life to metrics
+    # Add forecast of average asset life to metrics & calculate depreciation
     for yr in fcst_yrs:
         fcst_metr.loc['AssetLife',yr] = np.random.choice(dst, 1)
+        fcst_is.loc['Depr', yr] = fcst_metr.loc['AssetLife', yr] * (fcst_bs.loc['PPE_Gross', (yr - 1)] + fcst_bs.loc['IA_Gross', (yr - 1)])
 
-    # Calculate depreciation
-    fcst_is.loc['Depr', yr] = fcst_metr.loc['AssetLife',yr] * (fcst_bs.loc['PPE_Gross', (yr - 1)] + fcst_bs.loc['IA_Gross', (yr - 1)])
+    # Calculate operating margin / operating profit
+    fcst_is.loc['SubT_OperatingProfit', :] = fcst_is.loc['SubT_GrossProfit', :] - fcst_is.loc['Opex_NonDepr', :] - fcst_is.loc['Depr', :]
+    fcst_metr.loc['Margin_Operating', :] = fcst_is.loc['SubT_OperatingProfit', :] / fcst_is.loc['Revenue', :]
 
     return (fcst_is, fcst_bs, fcst_metr)
 
@@ -132,15 +138,3 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
 
 
 
-# OTHER SIMPLE FORECASTS
-
-def fcst_goodwill(fcst_bs, data, fcst_yr1):
-
-    # GOODWILL & INTANGBILE ASSETS (No variability)
-    for yr in fcst_bs.columns:
-        if yr < fcst_yr1:
-            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', yr]
-        elif yr >= fcst_yr1:
-            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', (fcst_yr1 - 1)]
-
-    return fcst_bs
