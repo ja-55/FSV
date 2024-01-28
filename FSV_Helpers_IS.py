@@ -97,10 +97,14 @@ def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
     dst_scale = fcst_metr.loc['AssetLife',:(fcst_yr1 - 1)].std()
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
 
-    # Add forecast of average asset life to metrics & calculate depreciation
+    # Add forecast of average asset life to metrics & calculate depreciation (INCLUDES PH FOR PPE / IA)
     for yr in fcst_yrs:
         fcst_metr.loc['AssetLife',yr] = np.random.choice(dst, 1)
-        fcst_is.loc['Depr', yr] = fcst_metr.loc['AssetLife', yr] * (fcst_bs.loc['PPE_Gross', (yr - 1)] + fcst_bs.loc['IA_Gross', (yr - 1)])
+        fcst_bs.loc['PPE_Gross',yr] = fcst_bs.loc['PPE_Gross',yr] * 1.03
+        fcst_bs.loc['IA_Gross',yr] = fcst_bs.loc['IA_Gross',yr] * 1.03
+        print(fcst_bs)
+        print(fcst_metr)
+        fcst_is.loc['Depr', yr] = (fcst_bs.loc['PPE_Gross', (yr - 1)] + fcst_bs.loc['IA_Gross', (yr - 1)]) / fcst_metr.loc['AssetLife', yr]
 
     # Calculate operating margin / operating profit
     fcst_is.loc['SubT_OperatingProfit', :] = fcst_is.loc['SubT_GrossProfit', :] - fcst_is.loc['Opex_NonDepr', :] - fcst_is.loc['Depr', :]
