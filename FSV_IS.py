@@ -26,7 +26,7 @@ fcst_yrs = list(range(fcst_yr1, fcst_yr1 + 4))
 
 # ADD FORECAST COLUMNS
 main_is = main_is.reindex(columns=main_is.columns.tolist() + fcst_yrs)
-main_bs = main_bs.reindex(columns=main_is.columns.tolist() + fcst_yrs)
+main_bs = main_bs.reindex(columns=main_is.columns.tolist())
 
 # SET UP METRICS
 metr_is = pd.DataFrame(columns=main_is.columns.tolist())
@@ -45,9 +45,14 @@ main_is, metr_is = fsvh.fcst_mn_sga(main_is, metr_is, data, fcst_yrs, fcst_yr1)
 # Depreciation
 main_is, main_bs, metr_is = fsvh.fcst_depr(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1)
 
+# Interest Expense
+main_is, main_bs, metr_is = fsvh.fcst_costdebt(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1)
 
+# Tax Expense
+main_is, metr_is = fsvh.fcst_tax(main_is, metr_is, data, fcst_yrs, fcst_yr1)
 
 
 # OUTPUT
-# main_is.to_json("FSV_OP_IS.json")
-# metr_is.to_json("FSV_OP_Metr.json")
+main_is.to_excel("FSV_OP_IS.xlsx")
+metr_is.to_excel("FSV_OP_Metr.xlsx")
+main_bs.to_excel("FSV_OP_BS.xlsx")
