@@ -15,7 +15,7 @@ def fcst_turnratios(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
         
         if yr < fcst_yr1:
             fcst_bs.loc[turn_metric, yr] = data.loc[turn_metric, yr]
-            fcst_metr.loc[(turn_name),yr] = fcst_is.loc[turn_base, yr] / fcst_bs.loc[turn_metric, yr]
+            fcst_metr.loc[turn_name, yr] = fcst_is.loc[turn_base, yr] / fcst_bs.loc[turn_metric, yr]
         else: pass
 
     # Generate turnover distribution (Normal distribution)

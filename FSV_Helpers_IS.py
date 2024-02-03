@@ -53,13 +53,13 @@ def fcst_mn_gross(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
 
 # SG&A MARGIN (Ex. Depreciation)
 
-def fcst_mn_sga(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
+def fcst_mn_sga(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1, pct_sga_depr,
              dst_loc = 0.12, dst_scale = 0.005):
 
     # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
     for yr in fcst_is.columns:
         
-        if yr < fcst_yr1: fcst_is.loc['Opex_NonDepr', yr] = data.loc['Opex_NonDepr', yr]
+        if yr < fcst_yr1: fcst_is.loc['Opex_NonDepr', yr] = data.loc['SGA', yr] * pct_sga_depr
         else: pass
 
     # GENERATE SG&A DISTRIBUTION (Normal distribution)
