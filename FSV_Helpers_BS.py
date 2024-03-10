@@ -118,3 +118,4 @@ def fcst_pctofrev(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, stmt_na
         fcst_bs.loc[stmt_name, yr] = fcst_is.loc['Revenue', yr] * fcst_metr.loc[metr_name, yr]
 
     return (fcst_is, fcst_bs, fcst_metr)
+
