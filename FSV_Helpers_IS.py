@@ -17,8 +17,11 @@ def fcst_rev(fs_is, metrics, data, fcst_yrs, fcst_yr1,
     # GENERATE REVENUE GROWTH DISTRIBUTION (Skewnorm distribution)
     dst = skewnorm(dst_a, dst_loc, dst_scale).rvs(1000)
 
+    print(type(data.loc[('Revenue','IS'),:].pct_change(axis = 1)))
+    print(data.loc[('Revenue','IS'),:].pct_change(axis = 1).shape)
+
     # ADD REVENUE GROWTH TO METRICS - HISTORY
-    metrics.loc['Growth_Revenue',:] = data.loc[('Revenue','IS'),:].pct_change()
+    metrics.loc['Growth_Revenue',:] = data.loc[('Revenue','IS'),:].pct_change(axis = 1)
 
     # ADD REVENUE GROWTH / REVENUE $ FORECAST
     for yr in fcst_yrs:

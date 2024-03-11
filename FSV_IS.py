@@ -22,6 +22,7 @@ fs_is.set_index('Desc', inplace=True)
 fs_bs.set_index('Desc', inplace=True)
 fs_cf.set_index('Desc', inplace=True)
 
+
 # ASSUMPTIONS
 pct_depr_sga = 0.75
 num_fcst_yrs = 4
