@@ -6,6 +6,7 @@ from scipy.stats import norm
 
 import FSV_Helpers_IS as fsvh
 import FSV_Helpers_BS as fsvh_bs
+import FSV_Helpers_CF as fsvh_cf
 
 # NOTES
 # python -m http.server
@@ -28,7 +29,6 @@ pct_depr_sga = 0.75
 num_fcst_yrs = 4
 
 # VARIABLE SETUP
-hist_yr1 = fs_is.columns[1]
 fcst_yr1 = fs_is.columns[-1] + 1
 fcst_yrs = list(range(fcst_yr1, fcst_yr1 + num_fcst_yrs))
 
@@ -45,14 +45,20 @@ metrics = pd.DataFrame(columns = fs_is.columns.tolist())
 # Revenue
 fs_is, metrics = fsvh.fcst_rev(fs_is, metrics, data, fcst_yrs, fcst_yr1)
 
-# # Gross Margin / Gross Profit
-# main_is, metr_is = fsvh.fcst_mn_gross(main_is, metr_is, data, fcst_yrs, fcst_yr1)
+# Gross Margin / Gross Profit
+fs_is, metrics = fsvh.fcst_mn_gross(fs_is, metrics, data, fcst_yrs, fcst_yr1)
 
-# # OpEx (Non-Depreciation)
-# main_is, metr_is = fsvh.fcst_mn_sga(main_is, metr_is, data, fcst_yrs, fcst_yr1)
+# OpEx (Non-Depreciation)
+fs_is, metrics = fsvh.fcst_mn_sga(fs_is, metrics, data, fcst_yrs, fcst_yr1, pct_depr_sga)
+
+# Capex
+fs_is, fs_cf, metrics = fsvh_cf.fcst_capex(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
+
+# PPE & Intangibles
+fs_bs, metrics = fsvh_bs.fcst_ppeia(fs_bs, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
 
 # # Depreciation
-# main_is, main_bs, metr_is = fsvh.fcst_depr(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1, pct_depr_sga)
+# fs_is, fs_bs, metrics = fsvh.fcst_depr(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, pct_depr_sga)
 
 # # Interest Expense
 # main_is, main_bs, metr_is = fsvh.fcst_costdebt(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1)

@@ -11,17 +11,14 @@ def fcst_rev(fs_is, metrics, data, fcst_yrs, fcst_yr1,
 
     # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
     for yr in fs_is.columns:
-        if yr < fcst_yr1: fs_is.loc['Revenue', yr] = data.loc[('Revenue','IS'), yr].values[0]
+        if yr < fcst_yr1: fs_is.loc['Revenue', yr] = data.loc[('Revenue','IS'), yr]
         else: pass
 
     # GENERATE REVENUE GROWTH DISTRIBUTION (Skewnorm distribution)
     dst = skewnorm(dst_a, dst_loc, dst_scale).rvs(1000)
 
-    print(type(data.loc[('Revenue','IS'),:].pct_change(axis = 1)))
-    print(data.loc[('Revenue','IS'),:].pct_change(axis = 1).shape)
-
     # ADD REVENUE GROWTH TO METRICS - HISTORY
-    metrics.loc['Growth_Revenue',:] = data.loc[('Revenue','IS'),:].pct_change(axis = 1)
+    metrics.loc['Growth_Revenue',:] = data.loc[('Revenue','IS'),:].pct_change()
 
     # ADD REVENUE GROWTH / REVENUE $ FORECAST
     for yr in fcst_yrs:
@@ -38,7 +35,7 @@ def fcst_mn_gross(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
     # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
     for yr in fcst_is.columns:
         
-        if yr < fcst_yr1: fcst_is.loc['COS', yr] = data.loc['COS', yr]
+        if yr < fcst_yr1: fcst_is.loc['COS', yr] = data.loc[('COS','IS'), yr]
         else: pass
 
     # GENERATE GROSS MARGIN DISTRIBUTION (Normal distribution)
@@ -63,7 +60,7 @@ def fcst_mn_sga(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1, pct_sga_depr,
     # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
     for yr in fcst_is.columns:
         
-        if yr < fcst_yr1: fcst_is.loc['Opex_NonDepr', yr] = data.loc['SGA', yr] * pct_sga_depr
+        if yr < fcst_yr1: fcst_is.loc['Opex_NonDepr', yr] = data.loc[('SGA','IS'), yr] * pct_sga_depr
         else: pass
 
     # GENERATE SG&A DISTRIBUTION (Normal distribution)
@@ -86,9 +83,9 @@ def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
     for yr in fcst_is.columns:
         
         if yr < fcst_yr1:
-            fcst_is.loc['Depr', yr] = data.loc['Depr', yr]
-            fcst_bs.loc['PPE_Gross', yr] = data.loc['PPE_Gross', yr]
-            fcst_bs.loc['IA_Gross', yr] = data.loc['IA_Gross', yr]
+            fcst_is.loc['Depr', yr] = data.loc[('Depr','IS'), yr]
+            fcst_bs.loc['PPE_Gross', yr] = data.loc[('PPE_Gross','BS'), yr]
+            fcst_bs.loc['IA_Gross', yr] = ()
 
             # Add historical average asset life to metrics
             fcst_metr.loc['AssetLife',yr] = (fcst_bs.loc['PPE_Gross', yr] + fcst_bs.loc['IA_Gross', yr]) / fcst_is.loc['Depr', yr]
