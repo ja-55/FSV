@@ -54,7 +54,8 @@ fs_is, metrics = fsvh.fcst_mn_sga(fs_is, metrics, data, fcst_yrs, fcst_yr1, pct_
 # Capex
 fs_is, fs_cf, metrics = fsvh_cf.fcst_capex(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
 
-# PPE & Intangibles
+# PPE, Goodwill, Intangibles
+fs_bs = fsvh_bs.fcst_goodwill(fs_bs, data, fcst_yr1, 'Goodwill')
 fs_bs, metrics = fsvh_bs.fcst_ppeia(fs_bs, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
 
 # # Depreciation
@@ -93,6 +94,7 @@ fs_bs, metrics = fsvh_bs.fcst_ppeia(fs_bs, fs_cf, metrics, data, fcst_yrs, fcst_
 
 
 # # OUTPUT
-# # main_is.to_excel("FSV_OP_IS.xlsx")
-# # metr_is.to_excel("FSV_OP_Metr.xlsx")
-# # main_bs.to_excel("FSV_OP_BS.xlsx")
+fs_is.to_excel("FSV_OP_IS.xlsx")
+fs_bs.to_excel("FSV_OP_BS.xlsx")
+fs_cf.to_excel("FSV_OP_CF.xlsx")
+metrics.to_excel("FSV_OP_Metr.xlsx")

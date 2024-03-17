@@ -40,16 +40,17 @@ def fcst_ppeia(fcst_bs, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1):
         if yr < fcst_yr1:
             fcst_bs.loc['PPE_Gross', yr] = data.loc[('PPE_Gross','BS'), yr]
             fcst_bs.loc['PPE_Net', yr] = data.loc[('PPE_Net','BS'), yr]
-            fcst_bs.loc['Intangibles_Gross', yr] = data.loc[('Intangibles_Gross','BS'), yr]
-            fcst_bs.loc['Intangibles_Net', yr] = data.loc[('Intangibles_Net','BS'), yr]
+            fcst_bs.loc['IA_Gross', yr] = data.loc[('Intangibles_Gross','BS'), yr]
+            fcst_bs.loc['IA_Net', yr] = data.loc[('Intangibles_Net','BS'), yr]
 
         else: pass
 
         # Calculate retirements for actual years except year 1
         if yr != fcst_bs.columns[0]:
-            fcst_metr.loc['FA_Rtmt', yr] = fcst_bs.loc[('PPE_Gross','BS'), (yr - 1)] - fcst_bs.loc[('PPE_Gross','BS'), yr] + fcst_cf.loc[('Capex','CF'), yr]
+            fcst_metr.loc['FA_Rtmt', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] - fcst_bs.loc['PPE_Gross', yr] - fcst_cf.loc['Capex', yr]
             fcst_metr.loc['FA_Rtmt_Pct', yr] = fcst_metr.loc['FA_Rtmt', yr] / fcst_bs.loc['PPE_Gross', (yr - 1)]
-            fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc[('Intangibles_Gross','BS'), (yr - 1)] - fcst_bs.loc[('Intangibles_Gross','BS'), yr] + fcst_cf.loc[('IA_Adds','CF'), yr]
+            fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] - fcst_bs.loc['IA_Gross', yr]
+            #  + fcst_cf.loc['IA_Adds', yr]
             fcst_metr.loc['IA_Rtmt_Pct', yr] = fcst_metr.loc['IA_Rtmt', yr] / fcst_bs.loc['IA_Gross', (yr - 1)]
         else: pass
 
@@ -69,26 +70,27 @@ def fcst_ppeia(fcst_bs, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1):
         # Fixed assets
         fcst_metr.loc['FA_Rtmt_Pct', yr] = np.random.choice(dst_fa, 1)
         fcst_metr.loc['FA_Rtmt', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] * fcst_metr.loc['FA_Rtmt_Pct', yr]
-        fcst_bs.loc['PPE_Gross', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] + fcst_cf.loc['Capex', yr] + fcst_metr.loc['FA_Rtmt', yr]
+        fcst_bs.loc['PPE_Gross', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] - fcst_cf.loc['Capex', yr] + fcst_metr.loc['FA_Rtmt', yr]
+        fcst_bs.loc['PPE_Net', yr] = fcst_bs.loc['PPE_Net', (yr - 1)] - fcst_cf.loc['Capex', yr] + fcst_metr.loc['FA_Rtmt', yr]
 
         # Intangible assets
         fcst_metr.loc['IA_Rtmt_Pct', yr] = np.random.choice(dst_ia, 1)
         fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] * fcst_metr.loc['IA_Rtmt_Pct', yr]
-        fcst_bs.loc['IA_Gross', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] + fcst_cf.loc['IA_Adds', yr] + fcst_metr.loc['IA_Rtmt', yr]
-
+        fcst_bs.loc['IA_Gross', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] + fcst_metr.loc['IA_Rtmt', yr]
+        #  + fcst_cf.loc['IA_Adds', yr]
 
     return (fcst_bs, fcst_metr)
 
 # OTHER SIMPLE FORECASTS
 
-def fcst_goodwill(fcst_bs, data, fcst_yr1):
+def fcst_goodwill(fcst_bs, data, fcst_yr1, flag):
 
     # GOODWILL & INTANGBILE ASSETS (No variability)
     for yr in fcst_bs.columns:
         if yr < fcst_yr1:
-            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', yr]
+            fcst_bs.loc[flag, yr] = data.loc[(flag,'BS'), yr]
         elif yr >= fcst_yr1:
-            fcst_bs.loc['Goodwill', yr] = data.loc['Goodwill', (fcst_yr1 - 1)]
+            fcst_bs.loc[flag, yr] = data.loc[(flag,'BS'), (fcst_yr1 - 1)]
 
     return fcst_bs
 
