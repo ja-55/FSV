@@ -34,24 +34,23 @@ def fcst_turnratios(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
 
 def fcst_ppeia(fcst_bs, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1):
 
-    # Add actuals to balance sheet dataframe
     for yr in fcst_bs.columns:
-        
+
+        # Add actuals to balance sheet dataframe        
         if yr < fcst_yr1:
             fcst_bs.loc['PPE_Gross', yr] = data.loc[('PPE_Gross','BS'), yr]
             fcst_bs.loc['PPE_Net', yr] = data.loc[('PPE_Net','BS'), yr]
             fcst_bs.loc['Intangibles_Gross', yr] = data.loc[('Intangibles_Gross','BS'), yr]
             fcst_bs.loc['Intangibles_Net', yr] = data.loc[('Intangibles_Net','BS'), yr]
 
-            # Calculate retirements for actual years except year 1
-            try:
-                fcst_metr.loc['FA_Rtmt', yr] = fcst_bs.loc[('PPE_Gross','BS'), (yr - 1)] - fcst_bs.loc[('PPE_Gross','BS'), yr] + fcst_cf.loc[('Capex','CF'), yr]
-                fcst_metr.loc['FA_Rtmt_Pct', yr] = fcst_metr.loc['FA_Rtmt', yr] / fcst_bs.loc['PPE_Gross', (yr - 1)]
-                fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc[('Intangibles_Gross','BS'), (yr - 1)] - fcst_bs.loc[('Intangibles_Gross','BS'), yr] + fcst_cf.loc[('IA_Adds','CF'), yr]
-                fcst_metr.loc['IA_Rtmt_Pct', yr] = fcst_metr.loc['IA_Rtmt', yr] / fcst_bs.loc['IA_Gross', (yr - 1)]
-                print('Got to end of try block')
-            except: pass
+        else: pass
 
+        # Calculate retirements for actual years except year 1
+        if yr != fcst_bs.columns[0]:
+            fcst_metr.loc['FA_Rtmt', yr] = fcst_bs.loc[('PPE_Gross','BS'), (yr - 1)] - fcst_bs.loc[('PPE_Gross','BS'), yr] + fcst_cf.loc[('Capex','CF'), yr]
+            fcst_metr.loc['FA_Rtmt_Pct', yr] = fcst_metr.loc['FA_Rtmt', yr] / fcst_bs.loc['PPE_Gross', (yr - 1)]
+            fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc[('Intangibles_Gross','BS'), (yr - 1)] - fcst_bs.loc[('Intangibles_Gross','BS'), yr] + fcst_cf.loc[('IA_Adds','CF'), yr]
+            fcst_metr.loc['IA_Rtmt_Pct', yr] = fcst_metr.loc['IA_Rtmt', yr] / fcst_bs.loc['IA_Gross', (yr - 1)]
         else: pass
 
     # Create distribution for retirements as a percentage of gross PPE
