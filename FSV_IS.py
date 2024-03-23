@@ -58,14 +58,14 @@ fs_is, fs_cf, metrics = fsvh_cf.fcst_capex(fs_is, fs_cf, metrics, data, fcst_yrs
 fs_bs = fsvh_bs.fcst_goodwill(fs_bs, data, fcst_yr1, 'Goodwill')
 fs_bs, metrics = fsvh_bs.fcst_ppeia(fs_bs, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
 
-# # Depreciation
-# fs_is, fs_bs, metrics = fsvh.fcst_depr(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, pct_depr_sga)
+# Depreciation
+fs_is, fs_bs, metrics = fsvh.fcst_depr(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1)
 
-# # Interest Expense
-# main_is, main_bs, metr_is = fsvh.fcst_costdebt(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1)
+# Interest Expense
+fs_is, fs_bs, metrics = fsvh.fcst_costdebt(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1)
 
-# # Tax Expense
-# main_is, metr_is = fsvh.fcst_tax(main_is, metr_is, data, fcst_yrs, fcst_yr1)
+# Tax Expense
+fs_is, metrics = fsvh.fcst_tax(fs_is, metrics, data, fcst_yrs, fcst_yr1)
 
 
 # # FORECAST - BALANCE SHEET

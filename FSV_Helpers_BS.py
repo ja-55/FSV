@@ -47,10 +47,14 @@ def fcst_ppeia(fcst_bs, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1):
 
         # Calculate retirements for actual years except year 1
         if yr != fcst_bs.columns[0]:
-            fcst_metr.loc['FA_Rtmt', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] - fcst_bs.loc['PPE_Gross', yr] - fcst_cf.loc['Capex', yr]
+            fcst_metr.loc['FA_Rtmt', yr] = -(fcst_bs.loc['PPE_Gross', (yr - 1)] - fcst_bs.loc['PPE_Gross', yr] - fcst_cf.loc['Capex', yr])
             fcst_metr.loc['FA_Rtmt_Pct', yr] = fcst_metr.loc['FA_Rtmt', yr] / fcst_bs.loc['PPE_Gross', (yr - 1)]
-            fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] - fcst_bs.loc['IA_Gross', yr]
-            #  + fcst_cf.loc['IA_Adds', yr]
+            
+            if fcst_bs.loc['IA_Gross', (yr - 1)] - fcst_bs.loc['IA_Gross', yr] < 0:
+                fcst_metr.loc['IA_Rtmt', yr] = 0
+            else:
+                fcst_metr.loc['IA_Rtmt', yr] = -(fcst_bs.loc['IA_Gross', (yr - 1)] - fcst_bs.loc['IA_Gross', yr])
+            
             fcst_metr.loc['IA_Rtmt_Pct', yr] = fcst_metr.loc['IA_Rtmt', yr] / fcst_bs.loc['IA_Gross', (yr - 1)]
         else: pass
 
@@ -68,16 +72,24 @@ def fcst_ppeia(fcst_bs, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1):
     for yr in fcst_yrs:
 
         # Fixed assets
-        fcst_metr.loc['FA_Rtmt_Pct', yr] = np.random.choice(dst_fa, 1)
+        fcst_metr.loc['FA_Rtmt_Pct', yr] = -abs(np.random.choice(dst_fa, 1))
         fcst_metr.loc['FA_Rtmt', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] * fcst_metr.loc['FA_Rtmt_Pct', yr]
         fcst_bs.loc['PPE_Gross', yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] - fcst_cf.loc['Capex', yr] + fcst_metr.loc['FA_Rtmt', yr]
         fcst_bs.loc['PPE_Net', yr] = fcst_bs.loc['PPE_Net', (yr - 1)] - fcst_cf.loc['Capex', yr] + fcst_metr.loc['FA_Rtmt', yr]
 
         # Intangible assets
-        fcst_metr.loc['IA_Rtmt_Pct', yr] = np.random.choice(dst_ia, 1)
+        fcst_metr.loc['IA_Rtmt_Pct', yr] = -abs(np.random.choice(dst_ia, 1))
         fcst_metr.loc['IA_Rtmt', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] * fcst_metr.loc['IA_Rtmt_Pct', yr]
-        fcst_bs.loc['IA_Gross', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] + fcst_metr.loc['IA_Rtmt', yr]
-        #  + fcst_cf.loc['IA_Adds', yr]
+        
+        if fcst_bs.loc['IA_Gross', (yr - 1)] + fcst_metr.loc['IA_Rtmt', yr] < 0:
+            fcst_bs.loc['IA_Gross', yr] = 0
+        else:
+            fcst_bs.loc['IA_Gross', yr] = fcst_bs.loc['IA_Gross', (yr - 1)] + fcst_metr.loc['IA_Rtmt', yr]
+
+        if fcst_bs.loc['IA_Net', (yr - 1)] + fcst_metr.loc['IA_Rtmt', yr] < 0:
+            fcst_bs.loc['IA_Net', yr] = 0
+        else:
+            fcst_bs.loc['IA_Net', yr] = fcst_bs.loc['IA_Net', (yr - 1)] + fcst_metr.loc['IA_Rtmt', yr]
 
     return (fcst_bs, fcst_metr)
 

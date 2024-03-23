@@ -84,8 +84,6 @@ def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
         
         if yr < fcst_yr1:
             fcst_is.loc['Depr', yr] = data.loc[('Depr','IS'), yr]
-            fcst_bs.loc['PPE_Gross', yr] = data.loc[('PPE_Gross','BS'), yr]
-            fcst_bs.loc['IA_Gross', yr] = ()
 
             # Add historical average asset life to metrics
             fcst_metr.loc['AssetLife',yr] = (fcst_bs.loc['PPE_Gross', yr] + fcst_bs.loc['IA_Gross', yr]) / fcst_is.loc['Depr', yr]
@@ -100,12 +98,10 @@ def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
     # Add forecast of average asset life to metrics & calculate depreciation (INCLUDES PH FOR PPE / IA)
     for yr in fcst_yrs:
         fcst_metr.loc['AssetLife',yr] = np.random.choice(dst, 1)
-        fcst_bs.loc['PPE_Gross',yr] = fcst_bs.loc['PPE_Gross', (yr - 1)] * 1.03
-        fcst_bs.loc['IA_Gross',yr] = fcst_bs.loc['IA_Gross', (yr - 1)] * 1.03
         fcst_is.loc['Depr', yr] = (fcst_bs.loc['PPE_Gross', yr] + fcst_bs.loc['IA_Gross', yr]) / fcst_metr.loc['AssetLife', yr]
 
     # Calculate operating margin / operating profit
-    fcst_is.loc['SubT_OperatingProfit', :] = fcst_is.loc['SubT_GrossProfit', :] - fcst_is.loc['Opex_NonDepr', :] - fcst_is.loc['Depr', :]
+    fcst_is.loc['SubT_OperatingProfit', :] = fcst_is.loc['SubT_GrossProfit', :] - fcst_is.loc['Opex_NonDepr', :]
     fcst_metr.loc['Margin_Operating', :] = fcst_is.loc['SubT_OperatingProfit', :] / fcst_is.loc['Revenue', :]
 
     return (fcst_is, fcst_bs, fcst_metr)
@@ -119,9 +115,9 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
     for yr in fcst_is.columns:
         
         if yr < fcst_yr1:
-            fcst_is.loc['IntExp', yr] = data.loc['IntExp', yr]
-            fcst_bs.loc['LTD_Current', yr] = data.loc['LTD_Current', yr]
-            fcst_bs.loc['LTD_NonCurrent', yr] = data.loc['LTD_NonCurrent', yr]
+            fcst_is.loc['IntExp', yr] = data.loc[('IntExp','IS'), yr]
+            fcst_bs.loc['LTD_Current', yr] = data.loc[('LTD_Current','BS'), yr]
+            fcst_bs.loc['LTD_NonCurrent', yr] = data.loc[('LTD_NonCurrent','BS'), yr]
             fcst_metr.loc['Cost_Debt'] = fcst_is.loc['IntExp', yr] / (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr])
         else: pass
 
@@ -150,7 +146,7 @@ def fcst_tax(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1):
     for yr in fcst_is.columns:
         
         if yr < fcst_yr1:
-            fcst_is.loc['TaxExp', yr] = data.loc['TaxExp', yr]
+            fcst_is.loc['TaxExp', yr] = data.loc[('TaxExp','IS'), yr]
             fcst_metr.loc['TaxRate', yr] = fcst_is.loc['TaxExp', yr] / fcst_is.loc['SubT_PretaxProfit', yr]
         else: pass
 
