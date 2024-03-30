@@ -60,7 +60,7 @@ def fcst_mn_sga(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1, pct_sga_depr,
     # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
     for yr in fcst_is.columns:
         
-        if yr < fcst_yr1: fcst_is.loc['Opex_NonDepr', yr] = data.loc[('SGA','IS'), yr] * pct_sga_depr
+        if yr < fcst_yr1: fcst_is.loc['Opex_NonDepr', yr] = data.loc[('SGA','IS'), yr] - data.loc[('Depr','IS'), yr] * pct_sga_depr
         else: pass
 
     # GENERATE SG&A DISTRIBUTION (Normal distribution)
@@ -77,7 +77,7 @@ def fcst_mn_sga(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1, pct_sga_depr,
 
 # DEPRECIATION
 
-def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
+def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, pct_sga_depr):
 
     # Add actuals to income statement / balance sheet dataframe
     for yr in fcst_is.columns:
@@ -101,7 +101,7 @@ def fcst_depr(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
         fcst_is.loc['Depr', yr] = (fcst_bs.loc['PPE_Gross', yr] + fcst_bs.loc['IA_Gross', yr]) / fcst_metr.loc['AssetLife', yr]
 
     # Calculate operating margin / operating profit
-    fcst_is.loc['SubT_OperatingProfit', :] = fcst_is.loc['SubT_GrossProfit', :] - fcst_is.loc['Opex_NonDepr', :]
+    fcst_is.loc['SubT_OperatingProfit', :] = fcst_is.loc['SubT_GrossProfit', :] - fcst_is.loc['Opex_NonDepr', :] - fcst_is.loc['Depr', :] * pct_sga_depr
     fcst_metr.loc['Margin_Operating', :] = fcst_is.loc['SubT_OperatingProfit', :] / fcst_is.loc['Revenue', :]
 
     return (fcst_is, fcst_bs, fcst_metr)
@@ -116,6 +116,7 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
         
         if yr < fcst_yr1:
             fcst_is.loc['IntExp', yr] = data.loc[('IntExp','IS'), yr]
+            fcst_is.loc['OthInc', yr] = data.loc[('OthInc','IS'), yr]
             fcst_bs.loc['LTD_Current', yr] = data.loc[('LTD_Current','BS'), yr]
             fcst_bs.loc['LTD_NonCurrent', yr] = data.loc[('LTD_NonCurrent','BS'), yr]
             fcst_metr.loc['Cost_Debt'] = fcst_is.loc['IntExp', yr] / (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr])
@@ -132,8 +133,9 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
         fcst_bs.loc['LTD_Current', yr] = fcst_bs.loc['LTD_Current', (yr - 1)] * 1.03
         fcst_bs.loc['LTD_NonCurrent', yr] = fcst_bs.loc['LTD_NonCurrent', (yr - 1)] * 1.03
         fcst_is.loc['IntExp', yr] = (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr]) * fcst_metr.loc['Cost_Debt', yr]
+        fcst_is.loc['OthInc', yr] = 0
 
-    fcst_is.loc['SubT_PretaxProfit', :] = fcst_is.loc['SubT_OperatingProfit', :] - fcst_is.loc['IntExp', :]
+    fcst_is.loc['SubT_PretaxProfit', :] = fcst_is.loc['SubT_OperatingProfit', :] - fcst_is.loc['IntExp', :] - fcst_is.loc['OthInc', :]
     fcst_metr.loc['Margin_Pretax', :] = fcst_is.loc['SubT_PretaxProfit', :] / fcst_is.loc['Revenue', :]
 
     return (fcst_is, fcst_bs, fcst_metr)
@@ -150,10 +152,9 @@ def fcst_tax(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1):
             fcst_metr.loc['TaxRate', yr] = fcst_is.loc['TaxExp', yr] / fcst_is.loc['SubT_PretaxProfit', yr]
         else: pass
 
-
     # GENERATE INCOME TAX RATE DISTRIBUTION (Normal distribution)
     dst_loc = fcst_metr.loc['TaxRate',:(fcst_yr1 - 1)].mean()
-    dst_scale = fcst_metr.loc['TaxRate',:(fcst_yr1 - 1)].std()
+    dst_scale = 0
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
 
     # FORECAST

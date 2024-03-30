@@ -59,7 +59,7 @@ fs_bs = fsvh_bs.fcst_goodwill(fs_bs, data, fcst_yr1, 'Goodwill')
 fs_bs, metrics = fsvh_bs.fcst_ppeia(fs_bs, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
 
 # Depreciation
-fs_is, fs_bs, metrics = fsvh.fcst_depr(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1)
+fs_is, fs_bs, metrics = fsvh.fcst_depr(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, pct_depr_sga)
 
 # Interest Expense
 fs_is, fs_bs, metrics = fsvh.fcst_costdebt(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1)
@@ -68,22 +68,21 @@ fs_is, fs_bs, metrics = fsvh.fcst_costdebt(fs_is, fs_bs, metrics, data, fcst_yrs
 fs_is, metrics = fsvh.fcst_tax(fs_is, metrics, data, fcst_yrs, fcst_yr1)
 
 
-# # FORECAST - BALANCE SHEET
+# FORECAST - BALANCE SHEET
 
-# # Accounts Receivable
-# main_is, main_bs, metr_is = fsvh_bs.fcst_turnratios(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1, 'AR', 'Revenue')
+# Turnover-based metrics (AR, AP, Inventory)
+fs_is, fs_bs, metrics = fsvh_bs.fcst_turnratios(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'AR', 'Revenue')
+fs_is, fs_bs, metrics = fsvh_bs.fcst_turnratios(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'AP', 'COS')
+fs_is, fs_bs, metrics = fsvh_bs.fcst_turnratios(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Inv', 'COS')
 
-# # Inventory
-# main_is, main_bs, metr_is = fsvh_bs.fcst_turnratios(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1, 'Inv', 'COS')
+# Goodwill
+fs_bs = fsvh_bs.fcst_goodwill(fs_bs, data, fcst_yr1,'Goodwill')
 
-# # Accounts Payable
-# main_is, main_bs, metr_is = fsvh_bs.fcst_turnratios(main_is, main_bs, metr_is, data, fcst_yrs, fcst_yr1, 'AP', 'COS')
-
-# # Goodwill
-# main_bs = fsvh_bs.fcst_goodwill(main_bs, data, fcst_yr1)
-
-
-
+# Other balance sheet metrics (Other CA, Other NCA, Other CL, Other NCL)
+fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_CA', 'Revenue')
+fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_NCA', 'Revenue')
+fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_CL', 'Revenue')
+fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_NCL', 'Revenue')
 
 
 

@@ -14,7 +14,7 @@ def fcst_turnratios(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1,
     for yr in fcst_bs.columns:
         
         if yr < fcst_yr1:
-            fcst_bs.loc[turn_metric, yr] = data.loc[turn_metric, yr]
+            fcst_bs.loc[turn_metric, yr] = data.loc[(turn_metric,'BS'), yr]
             fcst_metr.loc[turn_name, yr] = fcst_is.loc[turn_base, yr] / fcst_bs.loc[turn_metric, yr]
         else: pass
 
@@ -109,27 +109,27 @@ def fcst_goodwill(fcst_bs, data, fcst_yr1, flag):
 
 # OTHER BALANCE SHEET PERCENT OF REV FORECASTS (Other CA, Other NCA, Other CL, Other NCL)
 
-def fcst_pctofrev(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, stmt_name):
+def fcst_othbs(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, line_name, base_met):
 
-    metr_name = 'POR_' + stmt_name
+    metr_lbl = 'POR_' + line_name
 
     # Add actuals to income statement / balance sheet dataframe
     for yr in fcst_bs.columns:
 
         if yr < fcst_yr1:
-            fcst_bs.loc[stmt_name, yr] = data.loc[stmt_name, yr]
-            fcst_metr.loc[metr_name, yr] = fcst_bs.loc[metr_name, yr] / fcst_is.loc['Revenue', yr]
+            fcst_bs.loc[line_name, yr] = data.loc[(line_name, 'BS'), yr]
+            fcst_metr.loc[metr_lbl, yr] = fcst_bs.loc[line_name, yr] / fcst_is.loc[base_met, yr]
         else: pass
 
     # Generate distribution (Normal distribution)
-    dst_loc = fcst_metr.loc[metr_name,:(fcst_yr1 - 1)].mean()
-    dst_scale = fcst_metr.loc[metr_name,:(fcst_yr1 - 1)].std()
+    dst_loc = fcst_metr.loc[metr_lbl,:(fcst_yr1 - 1)].mean()
+    dst_scale = fcst_metr.loc[metr_lbl,:(fcst_yr1 - 1)].std()
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
 
     # Forecast metric
     for yr in fcst_yrs:
-        fcst_metr.loc[metr_name, yr] = np.random.choice(dst, 1)
-        fcst_bs.loc[stmt_name, yr] = fcst_is.loc['Revenue', yr] * fcst_metr.loc[metr_name, yr]
+        fcst_metr.loc[metr_lbl, yr] = np.random.choice(dst, 1)
+        fcst_bs.loc[line_name, yr] = fcst_is.loc[base_met, yr] * fcst_metr.loc[metr_lbl, yr]
 
     return (fcst_is, fcst_bs, fcst_metr)
 
