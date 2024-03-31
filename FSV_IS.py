@@ -81,12 +81,16 @@ fs_bs = fsvh_bs.fcst_goodwill(fs_bs, data, fcst_yr1,'Goodwill')
 # Other balance sheet metrics (Other CA, Other NCA, Other CL, Other NCL)
 fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_CA', 'Revenue')
 fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_NCA', 'Revenue')
-fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_CL', 'Revenue')
-fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_NCL', 'Revenue')
+fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_CL', 'Opex_NonDepr')
+fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_NCL', 'Opex_NonDepr')
 
 
 
+# FORECAST - CASH FLOW
 
+# Cash from operations lines
+fs_is, fs_cf, metrics = fcst_othcf(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1, 'Stock_Comp', 'Revenue')
+fs_is, fs_cf, metrics = fcst_othcf(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1, 'Other_CFO', 'Revenue')
 
 
 
