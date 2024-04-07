@@ -27,6 +27,8 @@ fs_cf.set_index('Desc', inplace=True)
 # ASSUMPTIONS
 pct_depr_sga = 0.75
 num_fcst_yrs = 4
+shr_price = 200
+yr1_begcash = 5455
 
 # VARIABLE SETUP
 fcst_yr1 = fs_is.columns[-1] + 1
@@ -89,12 +91,21 @@ fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs
 # FORECAST - CASH FLOW
 
 # Cash from operations lines
-fs_is, fs_cf, metrics = fcst_othcf(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1, 'Stock_Comp', 'Revenue')
-fs_is, fs_cf, metrics = fcst_othcf(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1, 'Other_CFO', 'Revenue')
+fs_is, fs_cf, metrics = fsvh_cf.fcst_othcfo(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1, 'Stock_Comp', 'Revenue')
+fs_is, fs_cf, metrics = fsvh_cf.fcst_othcfo(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1, 'Other_CFO', 'Revenue')
 
+# Cash for investment lines (ex capex)
+fs_is, fs_cf, metrics = fsvh_cf.fcst_othinv(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
 
+# Cash for financing lines
+fs_is, fs_cf, metrics = fsvh_cf.fcst_cff_stock(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1, 'CS_Issue', 'Revenue')
+fs_is, fs_cf, metrics = fsvh_cf.fcst_cff_stock(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1, 'CS_Repo', 'Revenue')
+fs_is, fs_cf, metrics = fsvh_cf.fcst_cff_ltd(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
+fs_is, fs_cf, metrics = fsvh_cf.fcst_othcff(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1)
+fs_is, fs_cf, metrics = fsvh_cf.fcst_cff_div(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1, shr_price)
 
-
+# Sub-totals
+fs_is, fs_cf = fsvh_cf.fcst_cf_subt(fs_is, fs_cf, yr1_begcash)
 
 # # OUTPUT
 fs_is.to_excel("FSV_OP_IS.xlsx")
