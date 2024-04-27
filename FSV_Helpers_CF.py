@@ -161,10 +161,12 @@ def fcst_cff_ltd(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1):
     for yr in fcst_cf.columns:
 
         if yr < fcst_yr1:
+            fcst_cf.loc['ST_Borrow', yr] = data.loc[('ST_Borrow', 'CF'), yr]
             fcst_cf.loc['LT_Borrow', yr] = data.loc[('LT_Borrow', 'CF'), yr]
         else: pass
 
     for yr in fcst_yrs:
+        fcst_cf.loc['ST_Borrow', yr] = 0
         fcst_cf.loc['LT_Borrow', yr] = 0
 
     return (fcst_is, fcst_cf, fcst_metr)
@@ -186,20 +188,25 @@ def fcst_othcff(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1):
     return (fcst_is, fcst_cf, fcst_metr)
 
 
-def fcst_cf_subt(fcst_is, fcst_cf, yr1_begcash):
+def fcst_cf_subt(fcst_is, fcst_bs, fcst_cf, data, yr1_begcash, fcst_yr1):
 
-    print(fcst_is['SubT_NetIncome'])
-
-    fcst_cf['SubT_CFO'] = fcst_is['SubT_NetIncome'] + fcst_is['Depr'] + fcst_cf['Stock_Comp'] + fcst_cf['Other_CFO']
-    fcst_cf['SubT_CFI'] = fcst_cf['Capex'] + fcst_cf['Net_Acq'] + fcst_cf['Other_CFI']
-    fcst_cf['SubT_CFF'] = fcst_cf['ST_Borrow'] + fcst_cf['LT_Borrow'] + fcst_cf['CS_Issue'] + fcst_cf['CS_Repo'] + fcst_cf['Dividends']
+    fcst_cf.loc['SubT_CFO',:] = fcst_is.loc['SubT_NetIncome',:] + fcst_is.loc['Depr',:] + fcst_cf.loc['Stock_Comp',:] + fcst_cf.loc['Other_CFO',:]
+    fcst_cf.loc['SubT_CFI',:] = fcst_cf.loc['Capex',:] + fcst_cf.loc['Net_Acq',:] + fcst_cf.loc['Other_CFI',:]
+    fcst_cf.loc['SubT_CFF',:] = fcst_cf.loc['ST_Borrow',:] + fcst_cf.loc['LT_Borrow',:] + fcst_cf.loc['CS_Issue',:] + fcst_cf.loc['CS_Repo',:] + fcst_cf.loc['Dividends',:] + fcst_cf.loc['Other_CFF',:]
 
     for yr in fcst_cf.columns:
         if yr == fcst_cf.columns[0]:
             fcst_cf.loc['Cash_Beg', yr] = yr1_begcash
             fcst_cf.loc['Cash_End', yr] = fcst_cf.loc['Cash_Beg', yr] + fcst_cf.loc['SubT_CFO', yr] + fcst_cf.loc['SubT_CFI', yr] + fcst_cf.loc['SubT_CFF', yr]
         else:
-            fcst_cf.loc['Cash_Beg'] = fcst_cf.loc['Cash_End', (yr - 1)]
+            fcst_cf.loc['Cash_Beg', yr] = fcst_cf.loc['Cash_End', (yr - 1)]
             fcst_cf.loc['Cash_End', yr] = fcst_cf.loc['Cash_Beg', yr] + fcst_cf.loc['SubT_CFO', yr] + fcst_cf.loc['SubT_CFI', yr] + fcst_cf.loc['SubT_CFF', yr]
 
-    return (fcst_is, fcst_cf)
+    
+    for yr in fcst_bs.columns:
+        if yr < fcst_yr1:
+            fcst_bs.loc['Cash', yr] = data.loc[('Cash','BS'), yr]
+        else:
+            fcst_bs.loc['Cash', yr] = fcst_cf.loc['Cash_End', yr]
+
+    return (fcst_is, fcst_bs, fcst_cf)

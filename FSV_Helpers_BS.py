@@ -133,3 +133,28 @@ def fcst_othbs(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, line_name,
 
     return (fcst_is, fcst_bs, fcst_metr)
 
+# BS INVESTMENTS
+
+def fcst_bsinv(fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, line_name, base_met):
+
+    metr_lbl = line_name + ' as % of ' + base_met
+
+    # Add actuals to income statement / balance sheet dataframe
+    for yr in fcst_bs.columns:
+
+        if yr < fcst_yr1:
+            fcst_bs.loc[line_name, yr] = data.loc[(line_name, 'BS'), yr]
+            fcst_metr.loc[metr_lbl, yr] = fcst_bs.loc[line_name, yr] / fcst_bs.loc[base_met, yr]
+        else: pass
+
+    # Generate distribution (Normal distribution)
+    dst_loc = fcst_metr.loc[metr_lbl,:(fcst_yr1 - 1)].mean()
+    dst_scale = fcst_metr.loc[metr_lbl,:(fcst_yr1 - 1)].std()
+    dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
+
+    # Forecast metric
+    for yr in fcst_yrs:
+        fcst_metr.loc[metr_lbl, yr] = np.random.choice(dst, 1)
+        fcst_bs.loc[line_name, yr] = fcst_bs.loc[base_met, yr] * fcst_metr.loc[metr_lbl, yr]
+
+    return (fcst_bs, fcst_metr)

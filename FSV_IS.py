@@ -105,7 +105,14 @@ fs_is, fs_cf, metrics = fsvh_cf.fcst_othcff(fs_is, fs_cf, metrics, data, fcst_yr
 fs_is, fs_cf, metrics = fsvh_cf.fcst_cff_div(fs_is, fs_cf, metrics, data, fcst_yrs, fcst_yr1, shr_price)
 
 # Sub-totals
-fs_is, fs_cf = fsvh_cf.fcst_cf_subt(fs_is, fs_cf, yr1_begcash)
+fs_is, fs_bs, fs_cf = fsvh_cf.fcst_cf_subt(fs_is, fs_bs, fs_cf, data, yr1_begcash, fcst_yr1)
+
+## FORECAST - CF DEPENDENT
+
+# BS Investments
+fs_bs, metrics = fsvh_bs.fcst_bsinv(fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'ST_Inv', 'Cash')
+fs_bs, metrics = fsvh_bs.fcst_bsinv(fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'LT_Inv', 'Cash')
+
 
 # # OUTPUT
 fs_is.to_excel("FSV_OP_IS.xlsx")
