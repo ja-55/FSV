@@ -1,15 +1,13 @@
 # IMPORTS
 import pandas as pd
 import numpy as np
-from scipy.stats import skewnorm
-from scipy.stats import norm
+# from scipy.stats import skewnorm
+# from scipy.stats import norm
 
 import FSV_Helpers_IS as fsvh
 import FSV_Helpers_BS as fsvh_bs
 import FSV_Helpers_CF as fsvh_cf
-
-# NOTES
-# python -m http.server
+import FSV_Valuation as fsvh_val
 
 
 # READ IN DATA
@@ -114,8 +112,21 @@ fs_bs, metrics = fsvh_bs.fcst_bsinv(fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'S
 fs_bs, metrics = fsvh_bs.fcst_bsinv(fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'LT_Inv', 'Cash')
 
 
-# # OUTPUT
+# FINANCIAL STATEMENT OUTPUT
 fs_is.to_excel("FSV_OP_IS.xlsx")
 fs_bs.to_excel("FSV_OP_BS.xlsx")
 fs_cf.to_excel("FSV_OP_CF.xlsx")
 metrics.to_excel("FSV_OP_Metr.xlsx")
+
+
+# VALUATION
+
+
+
+
+
+# To do
+# Break up valuation function into chunks
+# Create cost of capital functionality
+# Create continuing value functionality
+# Create discounting / summation functionality
