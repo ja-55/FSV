@@ -28,6 +28,13 @@ num_fcst_yrs = 4
 shr_price = 200
 yr1_begcash = 5455
 
+rfr = 0.054
+beta = 1.27
+rtn_mkt = 0.07
+
+gr_rate = 0.02
+ronic = 0.15
+
 # VARIABLE SETUP
 fcst_yr1 = fs_is.columns[-1] + 1
 fcst_yrs = list(range(fcst_yr1, fcst_yr1 + num_fcst_yrs))
@@ -120,10 +127,13 @@ metrics.to_excel("FSV_OP_Metr.xlsx")
 
 
 # VALUATION
+val_df = fsvh_val.valuation_fcf(fcst_yrs, fs_is, fs_bs, fs_cf, pct_depr_sga, metrics.loc['TaxRate', fcst_yrs])
+fs_bs, metrics = fsvh_val.cost_capital(fs_bs, metrics, rfr, beta, rtn_mkt)
+cv = fsvh_val.cont_val(val_df, gr_rate, ronic, metrics)
+sum_disc_vals = fsvh_val.disc_vals(val_df, metrics, cv)
+total_value_ps = fsvh_val.val_total(sum_disc_vals, fs_bs, fs_is, fcst_yrs)
 
-
-
-
+print(total_value_ps)
 
 # To do
 # Break up valuation function into chunks
