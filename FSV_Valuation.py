@@ -16,9 +16,10 @@ def valuation_fcf(fcst_yrs, fs_is, fs_bs, fs_cf, pct_depr_sga, tax_rate):
     val_df.loc['COS', :] = fs_is.loc['COS', fcst_yrs] - fs_is.loc['Depr', fcst_yrs] * (1 - pct_depr_sga)
     val_df.loc['SGA', :] = fs_is.loc['Opex_NonDepr', fcst_yrs]
     val_df.loc['Depr', :] = fs_is.loc['Depr', fcst_yrs]
+    val_df.loc['Stock_Comp', :] = fs_cf.loc['Stock_Comp', fcst_yrs]
 
     # Calculate Gross CF
-    val_df.loc['EBITA', :] = val_df.loc['Revenue', :] - val_df.loc['COS', :] - val_df.loc['SGA', :]
+    val_df.loc['EBITA', :] = val_df.loc['Revenue', :] - val_df.loc['COS', :] - val_df.loc['SGA', :] + val_df.loc['Stock_Comp', :]
     val_df.loc['Cash_Tax', :] = val_df.loc['EBITA', :] * tax_rate
     val_df.loc['NOPLAT', :] = val_df.loc['EBITA', :] - val_df.loc['Cash_Tax', :]
     val_df.loc['Gross_CF', :] = val_df.loc['NOPLAT', :] - val_df.loc['Depr', :]
@@ -44,9 +45,10 @@ def cost_capital(fs_bs, metrics, rfr, beta, rtn_mkt):
     metrics.loc['Debt_to_Assets', :] = fs_bs.loc[['LTD_Current','LTD_NonCurrent'], :].sum() / fs_bs.loc['Tot_Assets', :]
 
     # Calculate cost of capital
-    coc_debt = metrics.loc['Debt_to_Assets', :] * (metrics.loc['Cost_Debt', :] * (1 - metrics.loc['TaxRate', :]))
-    coc_equity = (1 - metrics.loc['Debt_to_Assets', :]) * (rfr + beta * (rfr + rtn_mkt))
-    metrics.loc['Cost_Capital', :] = coc_debt + coc_equity
+    coc_debt = metrics.loc['Cost_Debt', :] * (1 - metrics.loc['TaxRate', :])
+    coc_equity = rfr + beta * (rtn_mkt - rfr)
+    metrics.loc['Cost_Equity', :] = coc_equity
+    metrics.loc['Cost_Capital', :] = coc_debt * metrics.loc['Debt_to_Assets', :] + coc_equity * (1 - metrics.loc['Debt_to_Assets', :])
 
     return fs_bs, metrics
 
@@ -55,7 +57,7 @@ def cont_val(val_df, gr_rate, ronic, metrics):
 
     cv_factor = (1 - (gr_rate / ronic)) / (metrics.loc['Cost_Capital', max(val_df.columns)] - gr_rate)
 
-    gr_noplat_fcst = val_df.loc['NOPLAT', max(val_df.columns)] / val_df.loc['NOPLAT', min(val_df.columns)] ** (1 / (max(val_df.columns) - min(val_df.columns))) - 1
+    gr_noplat_fcst = (val_df.loc['NOPLAT', max(val_df.columns)] / val_df.loc['NOPLAT', min(val_df.columns)]) ** (1 / (max(val_df.columns) - min(val_df.columns) + 1)) - 1
 
     cv = val_df.loc['NOPLAT', max(val_df.columns)] * (1 + gr_noplat_fcst) * cv_factor
 
@@ -72,7 +74,6 @@ def disc_vals(val_df, metrics, cv):
         sum_disc_vals = sum_disc_vals + fcf_disc
 
     disc_factor_cv = 1 / ((1 + metrics.loc['Cost_Capital', max(val_df.columns)]) ** (max(val_df.columns) - min(val_df.columns) + 2))
-
     sum_disc_vals = sum_disc_vals + cv * disc_factor_cv
 
     return sum_disc_vals
@@ -86,8 +87,5 @@ def val_total(sum_disc_vals, fs_bs, fs_is, fcst_yrs):
     total_value = sum_disc_vals - tot_debt + fin_ast
 
     total_value_ps = total_value / fs_is.loc['Shares', crnt_yr]
-
-    print(total_value)
-    print(fs_is.loc['Shares', crnt_yr])
 
     return total_value_ps

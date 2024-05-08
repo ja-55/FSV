@@ -119,13 +119,6 @@ fs_bs, metrics = fsvh_bs.fcst_bsinv(fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'S
 fs_bs, metrics = fsvh_bs.fcst_bsinv(fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'LT_Inv', 'Cash')
 
 
-# FINANCIAL STATEMENT OUTPUT
-fs_is.to_excel("FSV_OP_IS.xlsx")
-fs_bs.to_excel("FSV_OP_BS.xlsx")
-fs_cf.to_excel("FSV_OP_CF.xlsx")
-metrics.to_excel("FSV_OP_Metr.xlsx")
-
-
 # VALUATION
 val_df = fsvh_val.valuation_fcf(fcst_yrs, fs_is, fs_bs, fs_cf, pct_depr_sga, metrics.loc['TaxRate', fcst_yrs])
 fs_bs, metrics = fsvh_val.cost_capital(fs_bs, metrics, rfr, beta, rtn_mkt)
@@ -133,10 +126,11 @@ cv = fsvh_val.cont_val(val_df, gr_rate, ronic, metrics)
 sum_disc_vals = fsvh_val.disc_vals(val_df, metrics, cv)
 total_value_ps = fsvh_val.val_total(sum_disc_vals, fs_bs, fs_is, fcst_yrs)
 
-print(total_value_ps)
 
-# To do
-# Break up valuation function into chunks
-# Create cost of capital functionality
-# Create continuing value functionality
-# Create discounting / summation functionality
+# FINANCIAL STATEMENT OUTPUT
+fs_is.to_excel("FSV_OP_IS.xlsx")
+fs_bs.to_excel("FSV_OP_BS.xlsx")
+fs_cf.to_excel("FSV_OP_CF.xlsx")
+metrics.to_excel("FSV_OP_Metr.xlsx")
+
+
