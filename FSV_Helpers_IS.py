@@ -122,7 +122,7 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
             fcst_metr.loc['Cost_Debt'] = fcst_is.loc['IntExp', yr] / (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr])
         else: pass
 
-    # GENERATE GROSS MARGIN DISTRIBUTION (Normal distribution)
+    # GENERATE COST OF DEBT DISTRIBUTION (Normal distribution)
     dst_loc = fcst_metr.loc['Cost_Debt',:(fcst_yr1 - 1)].mean()
     dst_scale = fcst_metr.loc['Cost_Debt',:(fcst_yr1 - 1)].std()
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
@@ -142,7 +142,7 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
 
 # INCOME TAX RATE / INCOME TAX EXPENSE
 
-def fcst_tax(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1):
+def fcst_tax(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1, taxrate_stat, flag_taxrate):
 
     # ADD ACTUALS TO INCOME STATEMENT & TAX RATE TO METRICS
     for yr in fcst_is.columns:
@@ -159,7 +159,10 @@ def fcst_tax(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1):
 
     # FORECAST
     for yr in fcst_yrs:
-        fcst_metr.loc['TaxRate', yr] = np.random.choice(dst, 1)
+        if flag_taxrate == 'Statutory':
+            fcst_metr.loc['TaxRate', yr] = taxrate_stat
+        else:
+            fcst_metr.loc['TaxRate', yr] = np.random.choice(dst, 1)
         fcst_is.loc['TaxExp', yr] = fcst_is.loc['SubT_PretaxProfit', yr] * fcst_metr.loc['TaxRate', yr]
 
     fcst_is.loc['SubT_NetIncome', :] = fcst_is.loc['SubT_PretaxProfit', :] - fcst_is.loc['TaxExp', :]
