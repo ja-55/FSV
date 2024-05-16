@@ -19,7 +19,7 @@ val_op = pd.DataFrame(columns = ['Growth Rate','RONIC','Value per Share'])
 
 # Forecast parameters
 num_fcst_yrs = 4
-num_sims = 25
+num_sims = 11
 df_cols = data.columns.tolist() + ['Desc']
 
 # Fundamental stats
@@ -44,6 +44,9 @@ ronic_loc = 0.15
 ronic_scale = 0.02
 dst_ronic = norm(loc = ronic_loc, scale = ronic_scale).rvs(1000)
 
+# Other
+metric_list = ['Growth_Revenue', 'Margin_Gross', 'Margin_SGA', 'POR_Capex', 'Margin_Operating', 'Cost_Debt', 'Margin_Pretax',
+               'TaxRate', 'Margin_NetIncome', 'DPS', 'DPS_Gr', 'Debt_to_Assets', 'Cost_Equity', 'Cost_Capital']
 
 for sim in range(num_sims):
 
@@ -113,7 +116,6 @@ for sim in range(num_sims):
     fs_is, fs_bs, metrics = fsvh_bs.fcst_othbs(fs_is, fs_bs, metrics, data, fcst_yrs, fcst_yr1, 'Other_NCL', 'Opex_NonDepr')
 
 
-
     # FORECAST - CASH FLOW
 
     # Cash from operations lines
@@ -162,7 +164,7 @@ for sim in range(num_sims):
     # fs_is.to_excel("FSV_OP_IS.xlsx")
     # fs_bs.to_excel("FSV_OP_BS.xlsx")
     # fs_cf.to_excel("FSV_OP_CF.xlsx")
-    # metrics.to_excel("FSV_OP_Metr.xlsx")
+    # metrics.loc[metric_list, :].to_excel("FSV_OP_Metr.xlsx")
 
 val_op.to_excel("FSV_OP_Val.xlsx")
 
