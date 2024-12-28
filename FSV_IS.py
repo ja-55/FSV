@@ -19,7 +19,7 @@ val_op = pd.DataFrame(columns = ['Growth Rate','RONIC','Value per Share'])
 
 # Forecast parameters
 num_fcst_yrs = 4
-num_sims = 11
+num_sims = 55
 df_cols = data.columns.tolist() + ['Desc']
 
 # Fundamental stats
