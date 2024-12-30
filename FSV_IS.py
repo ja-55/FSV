@@ -19,28 +19,28 @@ val_op = pd.DataFrame(columns = ['Growth Rate','RONIC','Value per Share'])
 
 # Forecast parameters
 num_fcst_yrs = 4
-num_sims = 55
+num_sims = 311
 df_cols = data.columns.tolist() + ['Desc']
 
 # Fundamental stats
-pct_depr_sga = 0.75
-shr_price = 200
-yr1_begcash = 5455
+pct_depr_sga = 0
+shr_price = 38
+yr1_begcash = 4420
 taxrate_stat = 0.21
 
 # Cost of equity
 rfr = 0.054
-beta = 1.27
+beta = 0.96
 rtn_mkt = 0.07
 
 # Flags
 flag_taxrate = 'Statutory'
 
 # Valuation rates
-gr_loc = 0.02
+gr_loc = 0.015
 gr_scale = 0.005
 dst_gr = norm(loc = gr_loc, scale = gr_scale).rvs(1000)
-ronic_loc = 0.15
+ronic_loc = 0.12
 ronic_scale = 0.02
 dst_ronic = norm(loc = ronic_loc, scale = ronic_scale).rvs(1000)
 
@@ -158,13 +158,25 @@ for sim in range(num_sims):
     val_op.loc[sim,'Growth Rate'] = gr
     val_op.loc[sim,'RONIC'] = ronic
 
+    # HISTORICAL VS. FORECAST COMPARISONS
+
+    val_op.loc[sim,'Fcst_AvRevGr'] = metrics.loc['Growth_Revenue', fcst_yrs].mean()
+    val_op.loc[sim,'Hist_AvRevGr'] = metrics.loc['Growth_Revenue', data.columns[1:]].mean()
+
+    val_op.loc[sim,'Fcst_MgnGr'] = metrics.loc['Margin_Gross', fcst_yrs].mean()
+    val_op.loc[sim,'Hist_MgnGr'] = metrics.loc['Margin_Gross', data.columns[1:]].mean()
+
+    val_op.loc[sim,'Fcst_MgnSGA'] = metrics.loc['Margin_SGA', fcst_yrs].mean()
+    val_op.loc[sim,'Hist_MgnSGA'] = metrics.loc['Margin_SGA', data.columns[1:]].mean()
+
+
     # print("Finished Sim #: " + str(sim))
 
     # FINANCIAL STATEMENT OUTPUT
-    # fs_is.to_excel("FSV_OP_IS.xlsx")
-    # fs_bs.to_excel("FSV_OP_BS.xlsx")
-    # fs_cf.to_excel("FSV_OP_CF.xlsx")
-    # metrics.loc[metric_list, :].to_excel("FSV_OP_Metr.xlsx")
+    fs_is.to_excel("FSV_OP_IS.xlsx")
+    fs_bs.to_excel("FSV_OP_BS.xlsx")
+    fs_cf.to_excel("FSV_OP_CF.xlsx")
+    metrics.loc[metric_list, :].to_excel("FSV_OP_Metr.xlsx")
 
 val_op.to_excel("FSV_OP_Val.xlsx")
 

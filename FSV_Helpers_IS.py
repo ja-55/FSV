@@ -30,7 +30,7 @@ def fcst_rev(fs_is, metrics, data, fcst_yrs, fcst_yr1,
 # GROSS MARGIN
 
 def fcst_mn_gross(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
-             dst_loc = 0.326, dst_scale = 0.01):
+             dst_loc = 0.3584, dst_scale = 0.01):
 
     # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
     for yr in fcst_is.columns:
@@ -55,7 +55,7 @@ def fcst_mn_gross(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1,
 # SG&A MARGIN (Ex. Depreciation)
 
 def fcst_mn_sga(fcst_is, fcst_metr, data, fcst_yrs, fcst_yr1, pct_sga_depr,
-             dst_loc = 0.12, dst_scale = 0.005):
+             dst_loc = 0.03, dst_scale = 0.005):
 
     # ADD ACTUALS TO INCOME STATEMENT DATAFRAME
     for yr in fcst_is.columns:
@@ -119,7 +119,7 @@ def fcst_costdebt(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1):
             fcst_is.loc['OthInc', yr] = data.loc[('OthInc','IS'), yr]
             fcst_bs.loc['LTD_Current', yr] = data.loc[('LTD_Current','BS'), yr]
             fcst_bs.loc['LTD_NonCurrent', yr] = data.loc[('LTD_NonCurrent','BS'), yr]
-            fcst_metr.loc['Cost_Debt'] = fcst_is.loc['IntExp', yr] / (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr])
+            fcst_metr.loc['Cost_Debt',yr] = fcst_is.loc['IntExp', yr] / (fcst_bs.loc['LTD_Current', yr] + fcst_bs.loc['LTD_NonCurrent', yr])
         else: pass
 
     # GENERATE COST OF DEBT DISTRIBUTION (Normal distribution)

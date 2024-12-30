@@ -137,9 +137,13 @@ def fcst_cff_div(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1, shr_pric
 
         else: pass
 
-    # Generate distribution (Normal distribution)
-    dst_loc = fcst_metr.loc['DPS_Gr',:(fcst_yr1 - 1)].mean()
-    dst_scale = fcst_metr.loc['DPS_Gr',:(fcst_yr1 - 1)].std()
+    # Generate distribution (Normal distribution) -- USING HISTORICAL IS TOO VOLATILE (FCX VALUATION)
+    # dst_loc = fcst_metr.loc['DPS_Gr',:(fcst_yr1 - 1)].mean()
+    # dst_scale = fcst_metr.loc['DPS_Gr',:(fcst_yr1 - 1)].std()
+    # dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
+
+    dst_loc = 0.03
+    dst_scale = 0.005
     dst = norm(loc = dst_loc, scale = dst_scale).rvs(1000)
 
     # Forecast metric
@@ -149,7 +153,7 @@ def fcst_cff_div(fcst_is, fcst_cf, fcst_metr, data, fcst_yrs, fcst_yr1, shr_pric
         fcst_is.loc['Shares', yr] = ((fcst_cf.loc['CS_Issue', yr] + fcst_cf.loc['CS_Repo', yr]) / shr_price) + fcst_is.loc['Shares', (yr - 1)]
 
         # Forecast dividend growth
-        fcst_metr.loc['DPS_Gr', yr] = np.random.choice(dst, 1)
+        fcst_metr.loc['DPS_Gr', yr] = abs(np.random.choice(dst, 1))
         fcst_metr.loc['DPS', yr] = fcst_metr.loc['DPS', (yr - 1)] * (1 + fcst_metr.loc['DPS_Gr', yr])
         fcst_cf.loc['Dividends', yr] = fcst_is.loc['Shares', yr] * fcst_metr.loc['DPS', yr]
 

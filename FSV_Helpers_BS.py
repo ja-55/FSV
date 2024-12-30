@@ -128,7 +128,7 @@ def fcst_othbs(fcst_is, fcst_bs, fcst_metr, data, fcst_yrs, fcst_yr1, line_name,
 
     # Forecast metric
     for yr in fcst_yrs:
-        fcst_metr.loc[metr_lbl, yr] = np.random.choice(dst, 1)
+        fcst_metr.loc[metr_lbl, yr] = abs(np.random.choice(dst, 1))
         fcst_bs.loc[line_name, yr] = fcst_is.loc[base_met, yr] * fcst_metr.loc[metr_lbl, yr]
 
     return (fcst_is, fcst_bs, fcst_metr)
